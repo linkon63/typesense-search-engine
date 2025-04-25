@@ -28,5 +28,12 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+use Typesense\Client;
+
+Route::get('/test-typesense', function () {
+    $client = app(Client::class);
+    return $client->collections['products']->retrieve();
+});
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

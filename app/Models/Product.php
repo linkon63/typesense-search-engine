@@ -6,10 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Scout\Searchable;
 
 class Product extends Model
 {
     use HasFactory, SoftDeletes;
+    use Searchable;
+
+    protected $table = "products";
 
     protected $fillable = [
         'name',
@@ -21,6 +25,21 @@ class Product extends Model
         'category_id',
         'image_path'
     ];
+
+    public function toSearchableArray()
+    {
+        return array_merge($this->toArray(), [
+            "name" => (string) $this->name,
+            "description" => $this->description,
+            "quantity" => $this->quantity,
+            "is_active" => (string) $this->is_active,
+        ]);
+    }
+
+    public function searchableAs(): string
+    {
+        return 'products';
+    }
 
     protected $casts = [
         'is_active' => 'boolean',
