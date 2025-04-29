@@ -28,12 +28,18 @@ class Product extends Model
 
     public function toSearchableArray()
     {
-        return array_merge($this->toArray(), [
-            "name" => (string) $this->name,
-            "description" => $this->description,
-            "quantity" => $this->quantity,
-            "is_active" => (string) $this->is_active,
-        ]);
+        return [
+            'name' => $this->name,
+            'description' => $this->description,
+            'quantity' => $this->quantity, // Make sure to include fields you want searchable
+            "is_active" => $this->is_active,
+        ];
+        // return array_merge($this->toArray(), [
+        //     "name" => (string) $this->name,
+        //     "description" => $this->description,
+        //     "quantity" => $this->quantity,
+        //     "is_active" => (string) $this->is_active,
+        // ]);
     }
 
     public function searchableAs(): string
@@ -41,37 +47,42 @@ class Product extends Model
         return 'products';
     }
 
-    protected $casts = [
-        'is_active' => 'boolean',
-        'price' => 'decimal:2',
-    ];
-
-    protected $dates = [
-        'deleted_at',
-    ];
-
-    public function category(): BelongsTo
+    public function getCollectionSchema(): array
     {
-        return $this->belongsTo(Category::class)->withDefault([
-            'name' => 'Uncategorized'
-        ]);
+        return [
+            'name' => 'products',
+            'fields' => [
+                [
+                    'name' => 'id',
+                    'type' => 'int32',
+                ],
+                [
+                    'name' => 'name',
+                    'type' => 'string',
+                ],
+                [
+                    'name' => 'description',
+                    'type' => 'string',
+                ],
+                [
+                    'name' => 'quantity',
+                    'type' => 'int32',
+                ],
+                [
+                    'name' => 'is_active',
+                    'type' => 'bool',
+                ],
+            ],
+            'default_sorting_field' => 'quantity',
+        ];
+
+    
     }
 
-    // Scope for active products
-    public function scopeActive($query)
+    public function typesenseQueryBy(): array
     {
-        return $query->where('is_active', true);
-    }
-
-    // Scope for products in stock
-    public function scopeInStock($query)
-    {
-        return $query->where('quantity', '>', 0);
-    }
-
-    // Accessor for formatted price
-    public function getFormattedPriceAttribute(): string
-    {
-        return number_format($this->price, 2);
+        return 
+            ['name', 'description']
+        ;
     }
 }
